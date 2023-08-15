@@ -1,13 +1,22 @@
 import { ProductModel } from '../DAO/models/products.model.js';
 import { ProductClass } from '../DAO/classes/products.class.js';
+import CustomError from './errors/CustomError.js';
+import { generateUserErrorInfo } from './errors/info.js';
+import { EError } from './errors/enums.js';
 
 const productClass = new ProductClass();
 
 export class ProductService {
   validateProduct(title, description, price, thumbnail, code, stock, category, status = true) {
     if (!title || !description || !price || !thumbnail || !code || !stock || !category || !status) {
-      console.log('Validation error: please complete all fields');
-      throw new Error('Validation error: please complete all fields');
+      /* console.log('Validation error: please complete all fields');
+      throw new Error('Validation error: please complete all fields'); */
+      CustomError.createError({
+        name: 'User creation error',
+        cause: generateUserErrorInfo(title, description, price, thumbnail, code, stock, category, (status = true)),
+        message: 'Error trying to create user',
+        code: EError.INCOMPLETE_FIELD_ERROR,
+      });
     }
   }
 

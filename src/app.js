@@ -17,6 +17,8 @@ import { productsRouter } from './routes/products.router.js';
 import { productsRealTime } from './routes/realTimeProducts.router.js';
 import { sessionsRouter } from './routes/sessions.router.js';
 import { __dirname, connectMongo, connectSocket } from './utils.js';
+import { testFaker } from './testFaker.js';
+import errorHandler from './middleware/error.js';
 
 
 const app = express();
@@ -75,6 +77,10 @@ app.use('/api/cookies', coockieRouter);
 
 /* HTML Render Session*/
 app.use('/api/sessions', sessionsRouter);
+
+/* Api Test Prueba*/
+app.use('/mockingproducts', testFaker);
+app.use(errorHandler);
 
 /* Config Handlebars */
 app.engine('handlebars', handlebars.engine());

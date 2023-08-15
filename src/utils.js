@@ -8,8 +8,10 @@ import { ChatModel } from './DAO/models/chat.model.js';
 import { ProductService } from './services/products.service.js';
 import { ProductModel } from './DAO/models/products.model.js';
 import bcrypt from 'bcrypt';
+import { Faker, es } from '@faker-js/faker';
 
 /*********************** Multer ***********************/
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -116,3 +118,48 @@ export function connectSocket(httpServer) {
 
 export const createHash = (password) => bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 export const isValidPassword = (password, hashPassword) => bcrypt.compareSync(password, hashPassword);
+
+/******************************* FakerJS *******************************/
+
+
+const faker = new Faker({ locale: [es] });
+
+export function generateUser() {
+  let numOfProducts = parseInt(faker.string.numeric(1, { bannedDigits: ['0'] }));
+  let products = [];
+  for (let i = 0; i < numOfProducts; i++) {
+    products.push(generateProduct());
+  }
+
+  const roleFaker = faker.helpers.arrayElement(['cliente', 'vendedor']);
+
+  return {
+    name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
+    sex: faker.person.sexType(),
+    birthDate: faker.date.birthdate(),
+    phone: faker.phone.number(),
+    image: faker.internet.avatar(),
+    id: faker.database.mongodbObjectId(),
+    email: faker.internet.email(),
+    ocupation: faker.person.jobType(),
+    isPremium: faker.datatype.boolean(0.9),
+    role: roleFaker,
+    products,
+  };
+}
+
+export function generateProduct() {
+  const productStatus = faker.helpers.arrayElement([true, false]);
+  return {
+    id: faker.database.mongodbObjectId(),
+    title: faker.commerce.productName(),
+    /* description: faker.commerce.productDescription(), */
+    price: faker.commerce.price(),
+    thumbnail: faker.internet.avatar(),
+    code: faker.string.alphanumeric(5),
+    stock: faker.string.numeric(1),
+    category: faker.commerce.department(),
+    status: productStatus,
+  };
+}
