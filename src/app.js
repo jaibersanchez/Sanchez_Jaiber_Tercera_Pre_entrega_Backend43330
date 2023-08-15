@@ -1,5 +1,6 @@
 import MongoStore from 'connect-mongo';
 import cookieParser from 'cookie-parser';
+import 'dotenv/config';
 import express from 'express';
 import handlebars from 'express-handlebars';
 import session from 'express-session';
@@ -79,6 +80,8 @@ app.use('/api/sessions', sessionsRouter);
 app.engine('handlebars', handlebars.engine());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'handlebars');
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 /* Socket */
 connectSocket(httpServer);

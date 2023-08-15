@@ -1,13 +1,15 @@
-
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { connect } from 'mongoose';
 import 'dotenv/config';
+import { connect } from 'mongoose';
 import { Server } from 'socket.io';
-import ProductManager from './DAO/fileSystem/productManager.js';
 import { ChatModel } from './DAO/models/chat.model.js';
+import { ProductService } from './services/products.service.js';
+import { ProductModel } from './DAO/models/products.model.js';
 import bcrypt from 'bcrypt';
+
+/*********************** Multer ***********************/
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -19,14 +21,20 @@ const storage = multer.diskStorage({
 });
 
 export const uploader = multer({ storage });
+
+/***************************** __dirname *****************************/
+
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
 
+/***************************** Connect to Mongo *****************************/
+
 const MONGO_USER = process.env.MONGO_USER;
 const MONGO_PASS = process.env.MONGO_PASS;
+
 export async function connectMongo() {
   try {
-    await connect('mongodb+srv://' + MONGO_USER + ':' + MONGO_PASS + '@atlascluster.z0mmpcl.mongodb.net/?retryWrites=true&w=majority');
+    await connect(`mongodb+srv://${MONGO_USER}:${MONGO_PASS}@atlascluster.z0mmpcl.mongodb.net/?retryWrites=true&w=majority`);
     console.log('Plug to mongo!');
   } catch (error) {
     console.log(error);
@@ -34,30 +42,68 @@ export async function connectMongo() {
   }
 }
 
+/******************************* Socket *******************************/
+
+const Products = new ProductService();
+
 export function connectSocket(httpServer) {
   const socketServer = new Server(httpServer);
 
   socketServer.on('connection', (socket) => {
     console.log('Un cliente se ha conectado ' + socket.id);
 
+    /*************** Add and Delete Products ***************/
     socket.on('new-product', async (newProduct) => {
-      const data = new ProductManager('./src/data/products.json');
-      await data.addProduct(newProduct);
+      try {
+        const { title, description, price, thumbnail, code, stock, category, status } = newProduct;
+        await Products.createOne(title, description, price, thumbnail, code, stock, category, status);
+        const allProducts = await ProductModel.find({});
+        const products = allProducts.map((product) => {
+          return {
+            title: product.title,
+            id: product._id,
+            description: product.description,
+            price: product.price,
+            code: product.code,
+            stock: product.stock,
+            category: product.category,
+            thumbnail: product.thumbnail,
+          };
+        });
 
-      const products = await data.getProducts();
-      console.log(products);
-      socketServer.emit('products', products);
+        console.log('desde utils');
+        socketServer.emit('products', products);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
-    socket.on('delete-product', async (productId) => {
-      const data = new ProductManager('./src/data/products.json');
-      await data.deleteProduct(productId);
+    socket.on('delete-product', async (idProduct) => {
+      try {
+        await Products.deleteOne(idProduct);
 
-      const products = await data.getProducts();
-      socketServer.emit('products', products);
+        const allProducts = await ProductModel.find({});
+        const products = allProducts.map((product) => {
+          return {
+            title: product.title,
+            id: product._id,
+            description: product.description,
+            price: product.price,
+            code: product.code,
+            stock: product.stock,
+            category: product.category,
+            thumbnail: product.thumbnail,
+          };
+        });
+
+        socketServer.emit('products', products);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
-
+    /******************** Chat Message ********************/
+    /* Back recibe */
     socket.on('msg_front_to_back', async (msg) => {
       const msgCreated = await ChatModel.create(msg);
       const msgs = await ChatModel.find({});
@@ -66,6 +112,7 @@ export function connectSocket(httpServer) {
   });
 }
 
+/******************************* BCrypt *******************************/
 
 export const createHash = (password) => bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 export const isValidPassword = (password, hashPassword) => bcrypt.compareSync(password, hashPassword);

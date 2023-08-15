@@ -1,18 +1,22 @@
 import { CartModel } from '../DAO/models/carts.models.js';
 import { ProductModel } from '../DAO/models/products.model.js';
+import { CartClass } from '../DAO/classes/carts.class.js';
+
+const cartClass = new CartClass();
 
 export class CartService {
   async getAll() {
     try {
-      const cart = await CartModel.find({});
+      const cart = await cartClass.getAll();
       return cart;
     } catch (error) {
       throw error;
     }
   }
+
   async createCart() {
     try {
-      const cart = await CartModel.create({});
+      const cart = await cartClass.createCart();
       return cart;
     } catch (err) {
       throw err;
@@ -21,7 +25,7 @@ export class CartService {
 
   async getCartById(cartId) {
     try {
-      const cart = await CartModel.findById(cartId);
+      const cart = await cartClass.getCartById(cartId);
       return cart;
     } catch (error) {
       throw error;
@@ -34,7 +38,7 @@ export class CartService {
       if (!product) {
         throw new Error('Product not found');
       }
-      const cart = await CartModel.findById(cartId);
+      const cart = await cartClass.getCartById(cartId);
       if (!cart) {
         throw new Error('Cart not found');
       }
@@ -63,7 +67,7 @@ export class CartService {
 
   async removeProductFromCart(cartId, productId) {
     try {
-      const cart = await CartModel.findById(cartId);
+      const cart = await cartClass.getCartById(cartId);
       if (!cart) {
         throw new Error('Cart not found');
       }
@@ -87,7 +91,7 @@ export class CartService {
   }
 
   async cleanCart(cid) {
-    const cart = await CartModel.findById(cid);
+    const cart = await cartClass.cleanCart(cid);
     if (!cart) {
       throw new Error('Cart not found');
     }

@@ -89,7 +89,7 @@ class ProductsController {
     try {
       const { id } = req.params;
 
-      const deleted = await Service.deleteOne(id);
+      const deleted = await Products.deleteOne(id);
       return res.status(200).json({
         status: 'success',
         msg: 'product deleted',

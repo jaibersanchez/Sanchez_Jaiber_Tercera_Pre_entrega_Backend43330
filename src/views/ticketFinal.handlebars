@@ -1,5 +1,9 @@
 <a class='cartId' id='{{idCart}}' href='http://localhost:8080/auth/perfil'><Button>Ver Perfil</Button></a>
-<h1>Carrito</h1>
+
+<h1>Compra Finalizada</h1>
+<h2>Numero de compra: {{idTicket}}</h2>
+<h2>User: {{infoUser.email}}</h2>
+<h2>Carrito</h2>
 <h2>Cart ID: {{idCart}}</h2>
 <h3>Products:</h3>
 <ul>
@@ -9,6 +13,7 @@
       <h4>quantity: {{quantity}}</h4>
     </li>
   {{/each}}
+
+  <h4>Total: ${{precioTotal}}</h4>
 </ul>
 <a href='/products'><button>ir a Productos</button></a>
-<a href='http://localhost:8080/carts/{{idCart}}/purchase'><button>Continuar Compra</button></a>

@@ -1,12 +1,24 @@
 import express from 'express';
-import ProductManager from '../DAO/fileSystem/productManager.js';
+import { ProductModel } from '../DAO/models/products.model.js';
+import { isAdmin } from '../middleware/auth.js';
 
-const container = new ProductManager('../src/data/products.json');
 export const productsRealTime = express.Router();
 
-productsRealTime.get('/', async (req, res) => {
+productsRealTime.get('/', isAdmin, async (req, res) => {
   try {
-    const products = await container.getProducts();
+    const productsAll = await ProductModel.find({});
+    const products = productsAll.map((product) => {
+      return {
+        title: product.title,
+        id: product._id,
+        description: product.description,
+        price: product.price,
+        code: product.code,
+        stock: product.stock,
+        category: product.category,
+        thumbnail: product.thumbnail,
+      };
+    });
     return res.status(200).render('realTimeProducts', { products });
   } catch (error) {
     console.log(error);

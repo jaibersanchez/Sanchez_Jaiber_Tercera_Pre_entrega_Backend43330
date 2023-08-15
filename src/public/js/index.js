@@ -10,7 +10,7 @@ const stock = document.getElementById('stock');
 const category = document.getElementById('category');
 
 socket.on('products', (products) => {
-  console.log(products);
+  console.log('desde index');
   const productList = document.getElementById('products-list');
   productList.innerHTML = `
   ${products
@@ -31,7 +31,7 @@ socket.on('products', (products) => {
             <li class='list-group-item'>Category: ${product.category}</li>
           </ul>
           <div class='card-body'>
-            <button type="button" class="btn btn-danger " onclick="deleteProduct(${product.id})">Eliminar</button>
+            <button type="button" class="btn btn-danger" onclick="deleteProduct('${product.id}')">Eliminar</button>
           </div>
         </div>
       </div>
@@ -50,10 +50,13 @@ formProducts.addEventListener('submit', (e) => {
     code: code.value,
     stock: stock.value,
     category: category.value,
+    status: true,
   };
   socket.emit('new-product', newProduct);
+  formProducts.reset();
 });
 
-function deleteProduct(productId) {
-  socket.emit('delete-product', productId);
+function deleteProduct(idProduct) {
+  socket.emit('delete-product', idProduct.toString());
+  alert(idProduct);
 }

@@ -1,7 +1,10 @@
 import { ProductModel } from '../DAO/models/products.model.js';
+import { ProductClass } from '../DAO/classes/products.class.js';
+
+const productClass = new ProductClass();
 
 export class ProductService {
-  validateProduct(title, description, price, thumbnail, code, stock, category, status) {
+  validateProduct(title, description, price, thumbnail, code, stock, category, status = true) {
     if (!title || !description || !price || !thumbnail || !code || !stock || !category || !status) {
       console.log('Validation error: please complete all fields');
       throw new Error('Validation error: please complete all fields');
@@ -30,25 +33,29 @@ export class ProductService {
   }
 
   async getOneById(id) {
-    const product = await ProductModel.findOne({ _id: id });
+    const product = await productClass.getOneById(id);
     return product;
   }
 
   async createOne(title, description, price, thumbnail, code, stock, category, status) {
     this.validateProduct(title, description, price, thumbnail, code, stock, category, status);
-    const productCreated = await ProductModel.create({ title, description, price, thumbnail, code, stock, category, status });
+    const productCreated = await productClass.createOne(title, description, price, thumbnail, code, stock, category, status);
     return productCreated;
   }
 
   async deleteOne(id) {
-    const deleted = await ProductModel.deleteOne({ _id: id });
-    return deleted;
+    try {
+      const deleted = await productClass.deleteOne(id);
+      return deleted;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async updateOne(id, title, description, price, thumbnail, code, stock, category, status) {
     if (!id) throw new Error('Invalid _id');
     this.validateProduct(title, description, price, thumbnail, code, stock, category, status);
-    const productUptaded = await ProductModel.updateOne({ _id: id }, { title, description, price, thumbnail, code, stock, category, status });
+    const productUptaded = await productClass.updateOne(id, title, description, price, thumbnail, code, stock, category, status);
     return productUptaded;
   }
 }

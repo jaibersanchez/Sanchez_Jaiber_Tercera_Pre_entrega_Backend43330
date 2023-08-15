@@ -1,6 +1,6 @@
 import express from 'express';
-import { CartService } from '../services/carts.service.js';
 import { cartController } from '../controllers/carts.controller.js';
+import { CartService } from '../services/carts.service.js';
 
 const cartService = new CartService();
 
